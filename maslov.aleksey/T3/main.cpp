@@ -1,39 +1,11 @@
 #include <functional>
-#include <algorithm>
 #include <iterator>
 #include <iostream>
 #include <fstream>
-#include <vector>
 #include <limits>
 #include <map>
-
-namespace maslov
-{
-  struct Point
-  {
-    int x, y;
-  };
-
-  struct Polygon
-  {
-    std::vector< Point > points;
-  };
-
-  void area(std::istream & in, std::ostream & out, const std::vector< Polygon > & polygons)
-  {}
-
-  void max(std::istream & in, std::ostream & out, const std::vector< Polygon > & polygons)
-  {}
-
-  void min(std::istream & in, std::ostream & out, const std::vector< Polygon > & polygons)
-  {}
-
-  void echo(std::istream & in, std::ostream & out, const std::vector< Polygon > & polygons)
-  {}
-
-  void rects(std::ostream & out, const std::vector< Polygon > & polygons)
-  {}
-}
+#include "commands.hpp"
+#include "ioGeometry.hpp"
 
 int main(int argc, char * argv[])
 {
@@ -48,17 +20,12 @@ int main(int argc, char * argv[])
     std::cout << "ERROR: there is no such file\n";
     return 1;
   }
-
   using maslov::Polygon;
+  using iIterator = std::istream_iterator< Polygon >;
   std::vector< Polygon > polygons;
   while (!file.eof())
   {
-    std::copy
-    (
-      std::istream_iterator< Polygon >(file),
-      std::istream_iterator< Polygon >(),
-      std::back_inserter(polygons)
-    );
+    std::copy(iIterator(file), iIterator(), std::back_inserter(polygons));
     if (!file)
     {
       std::cin.clear();
@@ -67,12 +34,12 @@ int main(int argc, char * argv[])
   }
 
   std::map< std::string, std::function< void() > > cmds;
-  cmds["AREA"] = std::bind(maslov::area, std::ref(std::cin), std::ref(std::cout), std::cref(polygons));
-  cmds["MAX"] = std::bind(maslov::max, std::ref(std::cin), std::ref(std::cout), std::cref(polygons));
-  cmds["MIN"] = std::bind(maslov::min, std::ref(std::cin), std::ref(std::cout), std::cref(polygons));
-  cmds["ECHO"] = std::bind(maslov::echo, std::ref(std::cin), std::ref(std::cout), std::cref(polygons));
-  cmds["RECTS"] = std::bind(maslov::rects, std::ref(std::cout), std::cref(polygons));
-  
+  cmds["AREA"] = std::bind(maslov::getArea, std::ref(std::cin), std::ref(std::cout), std::cref(polygons));
+  cmds["MAX"] = std::bind(maslov::getMax, std::ref(std::cin), std::ref(std::cout), std::cref(polygons));
+  cmds["MIN"] = std::bind(maslov::getMin, std::ref(std::cin), std::ref(std::cout), std::cref(polygons));
+  cmds["ECHO"] = std::bind(maslov::getEcho, std::ref(std::cin), std::ref(std::cout), std::cref(polygons));
+  cmds["RECTS"] = std::bind(maslov::getRects, std::ref(std::cout), std::cref(polygons));
+
   std::string command;
   while (!(std::cin >> command).eof())
   {
